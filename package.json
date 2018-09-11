@@ -1,0 +1,28 @@
+{
+  "name": "nandoku",
+  "version": "0.0.1",
+  "description": "nandoku project",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dokechin/nandoku.git"
+  },
+  "keywords": [
+    "nandoku"
+  ],
+  "author": "dokechin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dokechin/nandoku/issues"
+  },
+  "homepage": "https://github.com/dokechin/nandoku#readme",
+  "dependencies": {
+    "csv-parse": "^3.0.0",
+    "es6-promise-pool": "^2.5.0",
+    "kakasi.js": "../kakasi.js",
+    "moji": "^0.5.1"
+  }
+}
