@@ -4,7 +4,8 @@
   "description": "nandoku project",
   "main": "index.js",
   "scripts": {
-    "test": "ava --verbose"
+    "test": "ava --verbose",
+    "run": "node --max_old_space_size=8192 index.js"
   },
   "repository": {
     "type": "git",

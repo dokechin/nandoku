@@ -41,11 +41,6 @@ class PromisePool extends Es6PromisePool {
 	}
 }
 
-
-var kk = new Kakasi({
-    debug: true
-});
-
 const file = './data/chubu.csv';
 let data = fs.readFileSync(file);
 
@@ -55,43 +50,55 @@ var place = [];
 res.forEach( function(e,index){
   if (index > 0){
 		if (e[11] != null  && e[11] != '') {
-			place.push([e[9] + e[11], e[10] + e[12]])
+			place.push([e[9], e[10], e[11], e[12]])
 		}
 	}
 });
-var nandoku = [];
+var count = 0;
 
 var i = 0;
 var kk = new Kakasi({
 	debug: false
 });
+var cityMap = {};
+var townMap = {};
 
 var promiseProducer = function () {
 	if (i >= place.length){
 		return null;
 	}
-	var kanji = place[i][0];
-	var yomi = moji(place[i][1]).convert('KK', 'HG').toString();
+
+	var c = place[i][0];
+	var cy = moji(place[i][1]).convert('KK', 'HG').toString();
+	var t = place[i][2];
+	var ty = moji(place[i][3]).convert('KK', 'HG').toString();
+
 	i++;
-	return kk.transliterate(kanji)
-		.then(results => {
-			if (!results.includes(yomi)){
-				console.log(kanji);
-				console.log(results);
-				nandoku.push(kanji);
+
+	return new Promise( function (resolve, reject){
+	
+		judge(c, cy, t, ty).then( function (nandoku){
+			if (nandoku) {
+				console.log(c + t + " " + cy + ty);
+				count++;
 			}
-		})
-		.catch(error => {
-			reject(error);
+			resolve();
+		}).catch( function(error){
+			console.log(c + t + " " + cy + ty + " " + error);
+			resolve();
+			count++;
+		});
 	});
+
 }
 
-var pool = new PromisePool(promiseProducer, 20);
+
+var pool = new PromisePool(promiseProducer, 1);
 
 pool.start().then(
   function(results){
 	// returen values in this.resolves
-	console.log(nandoku.length)
+	console.log("total" + count)
   }
 	).catch(
 	function(error){
@@ -100,4 +107,48 @@ pool.start().then(
 )  
 
 
+async function judge(c, cy, t, ty){
+
+	if(c in cityMap ) {
+		if (cityMap[c]) {
+			return true;
+		}
+	}
+	else {
+		var yomi = await kk.read(c);
+		if (yomi.includes(cy)){
+			cityMap[c] = false;
+		} else {
+			var onkun = await kk.transliterate(c);
+			if (!onkun.includes(cy)){
+				cityMap[c] = true;
+				return true;
+			}
+			cityMap[c] = false;
+		}
+	}
+
+	if(t in townMap ) {
+		if (townMap[t]) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	else {
+		var yomi = await kk.read(t);
+		if (yomi.includes(ty)){
+			townMap[t] = false;
+			return false;
+		}	else {
+			var onkun = await kk.transliterate(t);
+			if (!onkun.includes(ty)){
+				townMap[t] = true;
+				return true;
+			}	
+			townMap[t] = false;
+			return false;
+		}
+	}
+}
 
